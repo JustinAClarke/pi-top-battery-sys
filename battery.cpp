@@ -166,18 +166,19 @@ int main(int argc, char **argv)
 
     int perc = readVal(0x0d);
 
+    printf(readValChar(0x17));
     // sprintf(POWER_SUPPLY_NAME,readVal(0x18));
     // sprintf(POWER_SUPPLY_STATUS,readVal(0x18));
     // sprintf(POWER_SUPPLY_PRESENT,readVal(0x18));
     // sprintf(POWER_SUPPLY_TECHNOLOGY,readVal(0x18));
-    sprintf(POWER_SUPPLY_CYCLE_COUNT,"%s",readValChar(0x17));
-    sprintf(POWER_SUPPLY_VOLTAGE_MIN_DESIGN,"%s",readValChar(0x19));
-    sprintf(POWER_SUPPLY_VOLTAGE_NOW,"%s",readValChar(0x09));
-    sprintf(POWER_SUPPLY_POWER_NOW,"%s",readValChar(0x3F));
-    sprintf(POWER_SUPPLY_ENERGY_FULL_DESIGN,"%s",readValChar(0x18));
-    sprintf(POWER_SUPPLY_ENERGY_FULL,"%s",readValChar(0x10));
-    sprintf(POWER_SUPPLY_ENERGY_NOW,"%s",readValChar(0x0F));
-    sprintf(POWER_SUPPLY_CAPACITY,"%s",readValChar(0x0A));
+    sprintf(POWER_SUPPLY_CYCLE_COUNT,readValChar(0x17));
+    sprintf(POWER_SUPPLY_VOLTAGE_MIN_DESIGN,readValChar(0x19));
+    sprintf(POWER_SUPPLY_VOLTAGE_NOW,readValChar(0x09));
+    sprintf(POWER_SUPPLY_POWER_NOW,readValChar(0x3F));
+    sprintf(POWER_SUPPLY_ENERGY_FULL_DESIGN,readValChar(0x18));
+    sprintf(POWER_SUPPLY_ENERGY_FULL,readValChar(0x10));
+    sprintf(POWER_SUPPLY_ENERGY_NOW,readValChar(0x0F));
+    sprintf(POWER_SUPPLY_CAPACITY,readValChar(0x0A));
     sprintf(POWER_SUPPLY_MODEL_NAME,"Pi-Top");
     sprintf(POWER_SUPPLY_MANUFACTURER,"Pi-Top");
     sprintf(POWER_SUPPLY_SERIAL_NUMBER,"");
