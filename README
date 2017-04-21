@@ -1,0 +1,6 @@
+### Pi-top Battery Reader
+
+
+Will place values into /sys/class/power_supply/BAT0/uevent at 5 min intervals
+
+
