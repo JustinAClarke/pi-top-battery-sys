@@ -9,11 +9,10 @@
 *    You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **/
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
-#include <fstream>
-#include <iostream>
-
+#include <cstring>
+#include <ctime>
 //#include <stdio>
 //#include <fstream>
 #include <wiringPiI2C.h>
@@ -82,17 +81,6 @@ int main(int argc, char **argv)
     //printf(readValChar(0x17));
     //printf("\n");
 
-    int time = readVal(0x12);
-    if ((time < 1) || (time > 960)) {
-            time = -1;
-        }
-    if (time <= 90) {
-        sprintf(timeStr, "%d min remaining", time);
-    }
-    else {
-        sprintf(timeStr, "%.1f hours remaining", (float)time / 60.0);
-    }
-
     int current = readVal(0x0A);
 
     if (current > 32767)                   // status is signed 16 bit word
@@ -100,14 +88,31 @@ int main(int argc, char **argv)
 
     if (current < 0)
         sprintf(statusStr,"Discharging");
-    else if (current > 0)
+    else if (current > 0){
         sprintf(statusStr,"Charging");
-        else
+    }
+    else
         sprintf(statusStr,"External Power");
 
+    int time = 0;
+    if (strcmp(statusStr,"Charging") == 0)
+      time = readVal(0x13);
+
+    else if (strcmp(statusStr,"Discharging") == 0)
+      time = readVal(0x12);
+    
+    if ((time < 1) || (time > 960)) {
+            time = -1;
+        }
+//     if (time <= 90) {
+        sprintf(timeStr, "%d min remaining", time);
+//     }
+    /*else {
+        sprintf(timeStr, "%.1f hours remaining", (float)time / 60.0);
+    }*/
 
 
-    printf("%s: %d %s\n", statusStr, perc, timeStr);
+    printf("%s: %d%% %s\n", statusStr, perc, timeStr);
 
     
     return 0;

@@ -1,0 +1,13 @@
+[Unit]
+ Description=Pi-Top Battery check
+ 
+[Service]
+ Type=simple
+ ExecStart=/opt/pi-top-battery-sys/battery
+ TimeoutStopSec=180
+ KillMode=process
+ KillSignal=SIGINT
+ 
+[Install]
+ WantedBy=multi-user.target
+

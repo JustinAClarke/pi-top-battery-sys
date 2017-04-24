@@ -10,13 +10,12 @@
 **/
 
 #include <stdio.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-
-//#include <stdio>
-//#include <fstream>
-//#include <wiringPiI2C.h>
+#include <wiringPiI2C.h>
 
 //format %status %percentage %remaining
 
@@ -39,29 +38,16 @@ POWER_SUPPLY_SERIAL_NUMBER=
 **/
 
 int i2c_handle;
-char POWER_SUPPLY_NAME[16];
-char POWER_SUPPLY_STATUS[16];
-char POWER_SUPPLY_PRESENT[16];
-char POWER_SUPPLY_TECHNOLOGY[16];
-char POWER_SUPPLY_CYCLE_COUNT[16];
-char POWER_SUPPLY_VOLTAGE_MIN_DESIGN[16];
-char POWER_SUPPLY_VOLTAGE_NOW[16];
-char POWER_SUPPLY_POWER_NOW[16];
-char POWER_SUPPLY_ENERGY_FULL_DESIGN[16];
-char POWER_SUPPLY_ENERGY_FULL[16];
-char POWER_SUPPLY_ENERGY_NOW[16];
-char POWER_SUPPLY_CAPACITY[16];
-char POWER_SUPPLY_MODEL_NAME[16];
-char POWER_SUPPLY_MANUFACTURER[16];
-char POWER_SUPPLY_SERIAL_NUMBER[16];
 
+FILE *ueventFile;
 
 int readVal(int loc){
-    //int res = wiringPiI2CReadReg8(i2c_handle, loc);
     int res = 0;
+    res = wiringPiI2CReadReg8(i2c_handle, loc);
+    //int res = 0;
     if (loc == 0x0A) {	// convert to signed integer
-        if (res > 32767)
-            res -= 65536;
+//         if (res > 32767)
+//             res -= 65536;
     }
     return res;
 }
@@ -76,115 +62,53 @@ char* readValChar(int loc){
     return val;
 }
 
-int writeFile(void){
-    std::ofstream uevent;
-
-    uevent.open("uevent");
-    //uevent.open("/sys/class/power_supply/BAT0/uevent");
-    
-    //uevent << "POWER_SUPPLY_NAME=BAT0  \nPOWER_SUPPLY_STATUS=Discharging  \nPOWER_SUPPLY_PRESENT=1  \nPOWER_SUPPLY_TECHNOLOGY=Li-ion  \nPOWER_SUPPLY_CYCLE_COUNT=481  \nPOWER_SUPPLY_VOLTAGE_MIN_DESIGN=7400000  \nPOWER_SUPPLY_VOLTAGE_NOW=7400000  \nPOWER_SUPPLY_POWER_NOW=9361000  \nPOWER_SUPPLY_ENERGY_FULL_DESIGN=48248000  \nPOWER_SUPPLY_ENERGY_FULL=40877000  \nPOWER_SUPPLY_ENERGY_NOW=20712000  \nPOWER_SUPPLY_CAPACITY=50  \nPOWER_SUPPLY_MODEL_NAME=UX32-65  \nPOWER_SUPPLY_MANUFACTURER=ASUSTeK  \nPOWER_SUPPLY_SERIAL_NUMBER=   \n";
-    
-    uevent << "POWER_SUPPLY_NAME=";
-    uevent << POWER_SUPPLY_NAME;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_STATUS=";
-    uevent << POWER_SUPPLY_STATUS;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_PRESENT=";
-    uevent << POWER_SUPPLY_PRESENT;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_TECHNOLOGY=ion  ";
-    uevent << POWER_SUPPLY_TECHNOLOGY;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_CYCLE_COUNT=";
-    uevent << POWER_SUPPLY_CYCLE_COUNT;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_VOLTAGE_MIN_DESIGN=";
-    uevent << POWER_SUPPLY_VOLTAGE_MIN_DESIGN;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_VOLTAGE_NOW=";
-    uevent << POWER_SUPPLY_VOLTAGE_NOW;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_POWER_NOW=";
-    uevent << POWER_SUPPLY_POWER_NOW;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_ENERGY_FULL_DESIGN=";
-    uevent << POWER_SUPPLY_ENERGY_FULL_DESIGN;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_ENERGY_FULL=";
-    uevent << POWER_SUPPLY_ENERGY_FULL;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_ENERGY_NOW=";
-    uevent << POWER_SUPPLY_ENERGY_NOW;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_CAPACITY=";
-    uevent << POWER_SUPPLY_CAPACITY;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_MODEL_NAME=";
-    uevent << POWER_SUPPLY_MODEL_NAME;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_MANUFACTURER=";
-    uevent << POWER_SUPPLY_MANUFACTURER;
-    uevent << "\n";
-    uevent << "POWER_SUPPLY_SERIAL_NUMBER=";
-    uevent << POWER_SUPPLY_SERIAL_NUMBER;
-    uevent << "\n";
-
-    
-    uevent.close();
-}
-
 int main(int argc, char **argv)
 {
 
-
-    sprintf(POWER_SUPPLY_NAME,"BAT0");
-    sprintf(POWER_SUPPLY_STATUS,"test");
-    sprintf(POWER_SUPPLY_PRESENT,"test");
-    sprintf(POWER_SUPPLY_TECHNOLOGY,"Li-Po");
-    // sprintf(POWER_SUPPLY_CYCLE_COUNT,"test");
-    // sprintf(POWER_SUPPLY_VOLTAGE_MIN_DESIGN,"test");
-    // sprintf(POWER_SUPPLY_VOLTAGE_NOW,"test");
-    // sprintf(POWER_SUPPLY_POWER_NOW,"test");
-    // sprintf(POWER_SUPPLY_ENERGY_FULL_DESIGN,"test");
-    // sprintf(POWER_SUPPLY_ENERGY_FULL,"test");
-    // sprintf(POWER_SUPPLY_ENERGY_NOW,"test");
-    // sprintf(POWER_SUPPLY_CAPACITY,"test");
-    // sprintf(POWER_SUPPLY_MODEL_NAME,"test");
-    // sprintf(POWER_SUPPLY_MANUFACTURER,"test");
-    // sprintf(POWER_SUPPLY_SERIAL_NUMBER,"test");
-    
     char POWER_SUPPLY_STATUS[16];
+    int POWER_SUPPLY_PRESENT = 0;
     char timeStr[32];
 
     sprintf(POWER_SUPPLY_STATUS,"Unknown Status");
     sprintf(timeStr,"Unknown Time");
 
-    //i2c_handle = wiringPiI2CSetup(0x0b);
+    i2c_handle = wiringPiI2CSetup(0x0b);
 
-    //sleep(5);
+    sleep(3);
 
     int perc = readVal(0x0d);
 
-    printf(readValChar(0x17));
+   // printf(readValChar(0x17));
     // sprintf(POWER_SUPPLY_NAME,readVal(0x18));
     // sprintf(POWER_SUPPLY_STATUS,readVal(0x18));
     // sprintf(POWER_SUPPLY_PRESENT,readVal(0x18));
     // sprintf(POWER_SUPPLY_TECHNOLOGY,readVal(0x18));
-    sprintf(POWER_SUPPLY_CYCLE_COUNT,readValChar(0x17));
-    sprintf(POWER_SUPPLY_VOLTAGE_MIN_DESIGN,readValChar(0x19));
-    sprintf(POWER_SUPPLY_VOLTAGE_NOW,readValChar(0x09));
-    sprintf(POWER_SUPPLY_POWER_NOW,readValChar(0x3F));
-    sprintf(POWER_SUPPLY_ENERGY_FULL_DESIGN,readValChar(0x18));
-    sprintf(POWER_SUPPLY_ENERGY_FULL,readValChar(0x10));
-    sprintf(POWER_SUPPLY_ENERGY_NOW,readValChar(0x0F));
-    sprintf(POWER_SUPPLY_CAPACITY,readValChar(0x0A));
-    sprintf(POWER_SUPPLY_MODEL_NAME,"Pi-Top");
-    sprintf(POWER_SUPPLY_MANUFACTURER,"Pi-Top");
-    sprintf(POWER_SUPPLY_SERIAL_NUMBER,"");
 
 
-    int time = readVal(0x12);
+
+
+
+    int current = readVal(0x0A);
+
+    if (current > 32767)                   // status is signed 16 bit word
+        current -= 65536;
+
+    if (current < 0)
+        sprintf(POWER_SUPPLY_STATUS,"Discharging");
+    else if (current > 0){
+        sprintf(POWER_SUPPLY_STATUS,"Charging");
+	POWER_SUPPLY_PRESENT=1;
+    }
+    else
+        sprintf(POWER_SUPPLY_STATUS,"External Power");
+
+    int time = 0;
+    if (strcmp(POWER_SUPPLY_STATUS,"Charging") == 0)
+      time = readVal(0x13);
+
+    else if (strcmp(POWER_SUPPLY_STATUS,"Discharging") == 0)
+      time = readVal(0x12);
+    
     if ((time < 1) || (time > 960)) {
             time = -1;
         }
@@ -195,23 +119,46 @@ int main(int argc, char **argv)
         sprintf(timeStr, "%.1f hours remaining", (float)time / 60.0);
     }
 
-    int current = readVal(0x0A);
-
-    if (current > 32767)                   // status is signed 16 bit word
-        current -= 65536;
-
-    if (current < 0)
-        sprintf(POWER_SUPPLY_STATUS,"Discharging");
-    else if (current > 0)
-        sprintf(POWER_SUPPLY_STATUS,"Charging");
-        else
-        sprintf(POWER_SUPPLY_STATUS,"External Power");
-
-
-
     printf("%s %d %s\n", POWER_SUPPLY_STATUS, perc, timeStr);
+  
+    char tmpStr[64];
+    mkdir("/opt/pi-top-battery-sys/BAT0/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    ueventFile = fopen("/opt/pi-top-battery-sys/BAT0/uevent","w+");
 
-    writeFile();
+
+    fprintf(ueventFile,"POWER_SUPPLY_NAME=BAT0\n");
+
+    fprintf(ueventFile,"POWER_SUPPLY_STATUS=%s\n",POWER_SUPPLY_STATUS);
+    fprintf(ueventFile,"POWER_SUPPLY_PRESENT=%i\n",POWER_SUPPLY_PRESENT);
+    fprintf(ueventFile,"POWER_SUPPLY_TECHNOLOGY=Li-ion\n");
+    fprintf(ueventFile,"POWER_SUPPLY_CYCLE_COUNT=%i\n",readVal(0x17));
+    fprintf(ueventFile,"POWER_SUPPLY_VOLTAGE_MIN_DESIGN=%i\n",readVal(0x19));
+    
+
+    fprintf(ueventFile,"POWER_SUPPLY_VOLTAGE_NOW=%i\n",readVal(0x09));
+    fprintf(ueventFile,"POWER_SUPPLY_POWER_NOW=%i\n",readVal(0x3F));
+    fprintf(ueventFile,"POWER_SUPPLY_ENERGY_FULL_DESIGN=%i\n",readVal(0x18));
+    fprintf(ueventFile,"POWER_SUPPLY_ENERGY_FULL=%i\n",readVal(0x10));
+    fprintf(ueventFile,"POWER_SUPPLY_ENERGY_NOW=%i\n",readVal(0x0F));
+    fprintf(ueventFile,"POWER_SUPPLY_CAPACITY=%i\n",readVal(0x0A));
+    fprintf(ueventFile,"POWER_SUPPLY_MODEL_NAME=Pi-Top\n");
+    fprintf(ueventFile,"POWER_SUPPLY_MANUFACTURER=Pi-Top\n");
+    fprintf(ueventFile,"POWER_SUPPLY_SERIAL_NUMBER=Pi-Top\n");
+
+    fflush(ueventFile);
+
+//     sprintf(POWER_SUPPLY_CYCLE_COUNT,readValChar(0x17));
+//     sprintf(POWER_SUPPLY_VOLTAGE_MIN_DESIGN,readValChar(0x19));
+//     sprintf(POWER_SUPPLY_VOLTAGE_NOW,readValChar(0x09));
+//     sprintf(POWER_SUPPLY_POWER_NOW,readValChar(0x3F));
+//     sprintf(POWER_SUPPLY_ENERGY_FULL_DESIGN,readValChar(0x18));
+//     sprintf(POWER_SUPPLY_ENERGY_FULL,readValChar(0x10));
+//     sprintf(POWER_SUPPLY_ENERGY_NOW,readValChar(0x0F));
+//     sprintf(POWER_SUPPLY_CAPACITY,readValChar(0x0A));
+//     sprintf(POWER_SUPPLY_MODEL_NAME,"Pi-Top");
+//     sprintf(POWER_SUPPLY_MANUFACTURER,"Pi-Top");
+//     sprintf(POWER_SUPPLY_SERIAL_NUMBER,"");
+   
     
     return 0;
 }

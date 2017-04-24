@@ -1,0 +1,11 @@
+[Unit]
+ Description= Automatic Pi-Top Battery Checker
+ 
+[Timer]
+ OnBootSec=3min
+ OnUnitActiveSec=5min
+ Unit=pi-top-battery-sys.service
+ 
+[Install]
+ WantedBy=multi-user.target
+
