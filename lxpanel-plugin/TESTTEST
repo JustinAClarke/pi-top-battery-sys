@@ -1,0 +1,18 @@
+all: lxpanel-plugin
+
+clean:
+	rm battery.so
+
+
+battery.so:
+	gcc -Wall `pkg-config --cflags gtk+-2.0 lxpanel` -shared -fPIC batt.c -o battery.so `pkg-config --libs lxpanel`
+
+install:
+#	sudo cp battery.so /usr/lib/lxpanel/plugins/
+#	sudo cp battery.so /usr/lib/arm-linux-gnueabihf/lxpanel/plugins/
+	sudo cp battery.so @pluginPath@
+
+uninstall:
+#	sudo rm /usr/lib/lxpanel/plugins/battery.so
+#	sudo rm /usr/lib/arm-linux-gnueabihf/lxpanel/plugins/battery.so
+	sudo rm @pluginPath@/battery.so

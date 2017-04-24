@@ -1,6 +1,21 @@
 ### Pi-top Battery Reader
 
 
-Will place values into /sys/class/power_supply/BAT0/uevent at 5 min intervals
 
+Will install to /opt/pi-top-battery-sys
+
+And get battery status every 5 minutes, via a systemd timer script, placing this data into:
+
+`/opt/pi-top-battery-sys/BAT0/uevent`
+
+
+Will also build and install a lxpanel plugin for the battery status for the 'new' path.
+
+
+TODO:
+
+Fix makefile scripts, to dynamically get the /lxpanel/plugins path, due to archlinux using the default `/usr/lib/lxpanel/plugins/` where rasiban uses `/usr/lib/arm-linux-gnueabihf/lxpanel/plugins/`/
+
+
+See if I can push the uevent to /sys/power_supply location.
 

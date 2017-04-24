@@ -1,5 +1,8 @@
 all: simple battery lxpanel-plugin
 
+clean:
+	rm battery_simple battery battery.so
+
 debug-all: simple-debug battery-debug
 
 debug: simple-debug battery-debug
